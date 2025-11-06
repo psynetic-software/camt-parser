@@ -1,0 +1,412 @@
+<!DOCTYPE html><html><head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>Third-Party Notices &amp; Licenses</title>
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,sans-serif;line-height:1.45;margin:24px;}
+h1{font-size:1.6rem;margin:0 0 0.5rem 0}
+h2{font-size:1.25rem;margin-top:2rem;border-bottom:1px solid #ddd;padding-bottom:0.2rem}
+details{border:1px solid #e5e7eb;border-radius:8px;padding:0.6rem 0.9rem;margin:0.6rem 0;}
+summary{font-weight:600;cursor:pointer}
+.meta{font-size:0.95rem;color:#444}
+.mono{font-family:ui-monospace,Consolas,Monaco,monospace;white-space:pre-wrap}
+.notice{background:#fff7ed;border:1px solid #fed7aa;padding:0.6rem;border-radius:6px}
+.toc li{margin:0.2rem 0}
+</style>
+</head><body>
+<h1>Third-Party Notices &amp; Licenses</h1>
+<p class='meta'>This document lists third-party components, their licenses, and required notices (NOTICE). SPDX identifiers follow the SPDX License List. <a href='https://spdx.org/licenses/'>https://spdx.org/licenses/</a>.</p>
+<h2>Contents</h2><ol class='toc'>
+<li><a href='#pugixml'>pugixml</a> – MIT</li>
+<li><a href='#utf8proc'>utf8proc</a> – MIT</li>
+</ol>
+<h2 id='pugixml'>pugixml</h2>
+<p class='meta'><b>License(s):</b> MIT<br><b>Copyright:</b> Copyright (c) 2006-2025 Arseny Kapoulkine.<br><b>URLs:</b> <a href='https://pugixml.org'>https://pugixml.org</a>, <a href='https://github.com/zeux/pugixml'>https://github.com/zeux/pugixml</a><br></p>
+<details><summary>Additional information (README)</summary><div class='mono'>pugixml [![Actions Status](https://github.com/zeux/pugixml/workflows/build/badge.svg)](https://github.com/zeux/pugixml/actions) [![Build status](https://ci.appveyor.com/api/projects/status/9hdks1doqvq8pwe7/branch/master?svg=true)](https://ci.appveyor.com/project/zeux/pugixml) [![codecov.io](https://codecov.io/github/zeux/pugixml/coverage.svg?branch=master)](https://codecov.io/github/zeux/pugixml?branch=master) ![MIT](https://img.shields.io/badge/license-MIT-blue.svg)
+=======
+
+pugixml is a C++ XML processing library, which consists of a DOM-like interface with rich traversal/modification
+capabilities, an extremely fast XML parser which constructs the DOM tree from an XML file/buffer, and an XPath 1.0
+implementation for complex data-driven tree queries. Full Unicode support is also available, with Unicode interface
+variants and conversions between different Unicode encodings (which happen automatically during parsing/saving).
+
+pugixml is used by a lot of projects, both open-source and proprietary, for performance and easy-to-use interface.
+
+## Documentation
+
+Documentation for the current release of pugixml is available on-line as two separate documents:
+
+* [Quick-start guide](https://pugixml.org/docs/quickstart.html), that aims to provide enough information to start using the library;
+* [Complete reference manual](https://pugixml.org/docs/manual.html), that describes all features of the library in detail.
+
+You’re advised to start with the quick-start guide; however, many important library features are either not described in it at all or only mentioned briefly; if you require more information you should read the complete manual.
+
+## Example
+
+Here&#39;s an example of how code using pugixml looks; it opens an XML file, goes over all Tool nodes and prints tools that have a Timeout attribute greater than 0:
+
+```c++
+#include &quot;pugixml.hpp&quot;
+#include &lt;iostream&gt;
+
+int main()
+{
+    pugi::xml_document doc;
+    pugi::xml_parse_result result = doc.load_file(&quot;xgconsole.xml&quot;);
+    if (!result)
+        return -1;
+        
+    for (pugi::xml_node tool: doc.child(&quot;Profile&quot;).child(&quot;Tools&quot;).children(&quot;Tool&quot;))
+    {
+        int timeout = tool.attribute(&quot;Timeout&quot;).as_int();
+        
+        if (timeout &gt; 0)
+            std::cout &lt;&lt; &quot;Tool &quot; &lt;&lt; tool.attribute(&quot;Filename&quot;).value() &lt;&lt; &quot; has timeout &quot; &lt;&lt; timeout &lt;&lt; &quot;\n&quot;;
+    }
+}
+```
+
+And the same example using XPath:
+
+```c++
+#include &quot;pugixml.hpp&quot;
+#include &lt;iostream&gt;
+
+int main()
+{
+    pugi::xml_document doc;
+    pugi::xml_parse_result result = doc.load_file(&quot;xgconsole.xml&quot;);
+    if (!result)
+        return -1;
+        
+    pugi::xpath_node_set tools_with_timeout = doc.select_nodes(&quot;/Profile/Tools/Tool[@Timeout &gt; 0]&quot;);
+    
+    for (pugi::xpath_node node: tools_with_timeout)
+    {
+        pugi::xml_node tool = node.node();
+        std::cout &lt;&lt; &quot;Tool &quot; &lt;&lt; tool.attribute(&quot;Filename&quot;).value() &lt;&lt;
+            &quot; has timeout &quot; &lt;&lt; tool.attribute(&quot;Timeout&quot;).as_int() &lt;&lt; &quot;\n&quot;;
+    }
+}
+```
+
+
+## License
+
+This library is available to anybody free of charge, under the terms of MIT License (see LICENSE.md).
+
+This work is based on the pugxml parser, which carried the following Public Domain dedication:
+
+    // Pug XML Parser - Version 1.0002
+    // --------------------------------------------------------
+    // Copyright (C) 2003, by Kristen Wegner (kristen@tima.net)
+    // Released into the Public Domain. Use at your own risk.
+    // See pugxml.xml for further information, history, etc.
+    // Contributions by Neville Franks (readonly@getsoft.com).
+</div></details>
+<details><summary><b>LICENSE (project-specific)</b></summary><div class='mono'>MIT License
+
+Copyright (c) 2006-2025 Arseny Kapoulkine
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the &quot;Software&quot;), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+</div></details>
+<details><summary>Show license text (MIT)</summary>
+<div class='mono'>MIT License
+
+Copyright (c) &lt;year&gt; &lt;copyright holders&gt;
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+associated documentation files (the &quot;Software&quot;), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the
+following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial
+portions of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+USE OR OTHER DEALINGS IN THE SOFTWARE.
+</div></details>
+<h2 id='utf8proc'>utf8proc</h2>
+<p class='meta'><b>License(s):</b> MIT<br><b>Copyright:</b> Copyright © 2014-2021 by Steven G. Johnson, Jiahao Chen, Tony Kelman, Jonas Fonseca, and other contributors listed in the git history.<br><b>URLs:</b> <a href='http://juliastrings.github.io/utf8proc/'>http://juliastrings.github.io/utf8proc/</a>, <a href='https://github.com/JuliaStrings/utf8proc'>https://github.com/JuliaStrings/utf8proc</a><br></p>
+<details><summary>Additional information (README)</summary><div class='mono'># utf8proc
+[![CI](https://github.com/NanoComp/meep/actions/workflows/build-ci.yml/badge.svg)](https://github.com/JuliaStrings/utf8proc/actions/workflows/build-ci.yml)
+[![AppVeyor status](https://ci.appveyor.com/api/projects/status/ivaa0v6ikxrmm5r6?svg=true)](https://ci.appveyor.com/project/StevenGJohnson/utf8proc)
+
+[utf8proc](http://juliastrings.github.io/utf8proc/) is a small, clean C
+library that provides Unicode normalization, case-folding, and other
+operations for data in the [UTF-8
+encoding](http://en.wikipedia.org/wiki/UTF-8).  It was [initially
+developed](http://www.public-software-group.org/utf8proc) by Jan
+Behrens and the rest of the [Public Software
+Group](http://www.public-software-group.org/), who deserve *nearly all
+of the credit* for this package.  With the blessing of the Public
+Software Group, the [Julia developers](http://julialang.org/) have
+taken over development of utf8proc, since the original developers have
+moved to other projects.
+
+utf8proc is used for basic Unicode
+support in the [Julia language](http://julialang.org/), and the Julia
+developers became involved because they wanted to add Unicode 7 support and other features; it is now regularly updated to keep up with recent Unicode releases.
+
+There are also utf8proc wrappers for [Ruby](https://www.ruby-toolbox.com/projects/utf8_proc) and [Rust](https://docs.rs/utf8proc/latest/utf8proc/) ([github](https://github.com/Techcable/utf8proc.rs)).  (The original utf8proc package also included PostgreSQL bindings.)
+
+The utf8proc package is licensed under the
+free/open-source [MIT &quot;expat&quot;
+license](http://opensource.org/licenses/MIT) (plus certain Unicode
+data governed by the similarly permissive [Unicode data
+license](http://www.unicode.org/copyright.html#Exhibit1)); please see
+the included `LICENSE.md` file for more detailed information.
+
+## Quick Start
+
+Typical users should download a [utf8proc release](http://juliastrings.github.io/utf8proc/releases/) rather than cloning directly from github.
+
+For compilation of the C library, run `make`.  You can also install the library and header file with `make install` (by default into `/usr/local/lib` and `/usr/local/bin`, but this can be changed by `make prefix=/some/dir`).  `make check` runs some tests, and `make clean` deletes all of the generated files.
+
+Alternatively, you can compile with `cmake`, e.g. by
+```sh
+mkdir build
+cmake -S . -B build
+cmake --build build
+```
+
+### Using other compilers
+The included `Makefile` supports GNU/Linux flavors and MacOS with `gcc`-like compilers; Windows users will typically use `cmake`.
+
+For other Unix-like systems and other compilers, you may need to pass modified settings to `make` in order to use the correct compilation flags for building shared libraries on your system.
+
+For HP-UX with HP&#39;s `aCC` compiler and GNU Make (installed as `gmake`), you can compile with
+```
+gmake CC=/opt/aCC/bin/aCC CFLAGS=&quot;+O2&quot; PICFLAG=&quot;+z&quot; C99FLAG=&quot;-Ae&quot; WCFLAGS=&quot;+w&quot; LDFLAG_SHARED=&quot;-b&quot; SOFLAG=&quot;-Wl,+h&quot;
+```
+To run `gmake install` you will need GNU coreutils for the `install` command, and you may want to pass `prefix=/opt libdir=/opt/lib/hpux32` or similar to change the installation location.
+
+### Using with CMake
+
+A CMake Config-file package is provided. To use utf8proc in a CMake project:
+
+```cmake
+add_executable (app app.c)
+find_package (utf8proc 2.9.0 REQUIRED)
+target_link_libraries (app PRIVATE utf8proc::utf8proc)
+```
+
+## General Information
+
+The C library is found in this directory after successful compilation
+and is named `libutf8proc.a` (for the static library) and
+`libutf8proc.so` (for the dynamic library).
+
+The Unicode version supported is 17.0.0.
+
+For Unicode normalizations, the following options are used:
+
+* Normalization Form C:  `STABLE`, `COMPOSE`
+* Normalization Form D:  `STABLE`, `DECOMPOSE`
+* Normalization Form KC: `STABLE`, `COMPOSE`, `COMPAT`
+* Normalization Form KD: `STABLE`, `DECOMPOSE`, `COMPAT`
+
+## C Library
+
+The documentation for the C library is found in the `utf8proc.h` header file.
+`utf8proc_map` is function you will most likely be using for mapping UTF-8
+strings, unless you want to allocate memory yourself.
+
+## To Do
+
+See the Github [issues list](https://github.com/JuliaLang/utf8proc/issues).
+
+## Contact
+
+Bug reports, feature requests, and other queries can be filed at
+the [utf8proc issues page on Github](https://github.com/JuliaLang/utf8proc/issues).
+
+## See also
+
+An independent Lua translation of this library, [lua-mojibake](https://github.com/differentprogramming/lua-mojibake), is also available.
+
+## Examples
+
+### Convert codepoint to string
+```c
+// Convert codepoint `a` to utf8 string `str`
+utf8proc_int32_t a = 223;
+utf8proc_uint8_t str[16] = { 0 };
+utf8proc_encode_char(a, str);
+printf(&quot;%s\n&quot;, str);
+// ß
+```
+
+### Convert string to codepoint
+```c
+// Convert string `str` to pointer to codepoint `a`
+utf8proc_uint8_t str[] = &quot;ß&quot;;
+utf8proc_int32_t a;
+utf8proc_iterate(str, -1, &amp;a);
+printf(&quot;%d\n&quot;, a);
+// 223
+```
+
+### Casefold
+
+```c
+// Convert &quot;ß&quot;  (U+00DF) to its casefold variant &quot;ss&quot;
+utf8proc_uint8_t str[] = &quot;ß&quot;;
+utf8proc_uint8_t *fold_str;
+utf8proc_map(str, 0, &amp;fold_str, UTF8PROC_NULLTERM | UTF8PROC_CASEFOLD);
+printf(&quot;%s\n&quot;, fold_str);
+// ss
+free(fold_str);
+```
+
+### Normalization Form C/D (NFC/NFD)
+```c
+// Decompose &quot;\u00e4\u00f6\u00fc&quot; = &quot;äöü&quot; into &quot;a\u0308o\u0308u\u0308&quot; (= &quot;äöü&quot; via combining char U+0308)
+utf8proc_uint8_t input[] = {0xc3, 0xa4, 0xc3, 0xb6, 0xc3, 0xbc}; // &quot;\u00e4\u00f6\u00fc&quot; = &quot;äöü&quot; in UTF-8
+utf8proc_uint8_t *nfd= utf8proc_NFD(input); // = {0x61, 0xcc, 0x88, 0x6f, 0xcc, 0x88, 0x75, 0xcc, 0x88}
+
+// Compose &quot;a\u0308o\u0308u\u0308&quot; into &quot;\u00e4\u00f6\u00fc&quot; (= &quot;äöü&quot; via precomposed characters)
+utf8proc_uint8_t *nfc= utf8proc_NFC(nfd);
+
+free(nfd);
+free(nfc);
+```
+</div></details>
+<details><summary><b>LICENSE (project-specific)</b></summary><div class='mono'>## utf8proc license ##
+
+**utf8proc** is a software package originally developed
+by Jan Behrens and the rest of the Public Software Group, who
+deserve nearly all of the credit for this library, that is now maintained by the Julia-language developers.  Like the original utf8proc,
+whose copyright and license statements are reproduced below, all new
+work on the utf8proc library is licensed under the [MIT &quot;expat&quot;
+license](http://opensource.org/licenses/MIT):
+
+*Copyright &amp;copy; 2014-2021 by Steven G. Johnson, Jiahao Chen, Tony Kelman, Jonas Fonseca, and other contributors listed in the git history.*
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the &quot;Software&quot;),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+## Original utf8proc license ##
+
+*Copyright (c) 2009, 2013 Public Software Group e. V., Berlin, Germany*
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the &quot;Software&quot;),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+## Unicode data license ##
+
+This software contains data (`utf8proc_data.c`) derived from processing
+the Unicode data files. The following license applies to that data:
+
+**COPYRIGHT AND PERMISSION NOTICE**
+
+*Copyright (c) 1991-2007 Unicode, Inc. All rights reserved. Distributed
+under the Terms of Use in http://www.unicode.org/copyright.html.*
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of the Unicode data files and any associated documentation (the &quot;Data
+Files&quot;) or Unicode software and any associated documentation (the
+&quot;Software&quot;) to deal in the Data Files or Software without restriction,
+including without limitation the rights to use, copy, modify, merge,
+publish, distribute, and/or sell copies of the Data Files or Software, and
+to permit persons to whom the Data Files or Software are furnished to do
+so, provided that (a) the above copyright notice(s) and this permission
+notice appear with all copies of the Data Files or Software, (b) both the
+above copyright notice(s) and this permission notice appear in associated
+documentation, and (c) there is clear notice in each modified Data File or
+in the Software as well as in the documentation associated with the Data
+File(s) or Software that the data or software has been modified.
+
+THE DATA FILES AND SOFTWARE ARE PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY
+KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF
+THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS
+INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT OR
+CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THE DATA FILES OR SOFTWARE.
+
+Except as contained in this notice, the name of a copyright holder shall
+not be used in advertising or otherwise to promote the sale, use or other
+dealings in these Data Files or Software without prior written
+authorization of the copyright holder.
+
+Unicode and the Unicode logo are trademarks of Unicode, Inc., and may be
+registered in some jurisdictions. All other trademarks and registered
+trademarks mentioned herein are the property of their respective owners.
+</div></details>
+<details><summary>Show license text (MIT)</summary>
+<div class='mono'>MIT License
+
+Copyright (c) &lt;year&gt; &lt;copyright holders&gt;
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+associated documentation files (the &quot;Software&quot;), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the
+following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial
+portions of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+USE OR OTHER DEALINGS IN THE SOFTWARE.
+</div></details>
+<hr><p class='meta'>Generated on 2025-11-06T17:35:45.</p>
+</body></html>

@@ -103,16 +103,25 @@ camt::export_entries_csv(doc, &out, nullptr, opt);
 | `use_effective_credit` | `false` | Apply reversal indicator |
 | `prefer_ultimate_counterparty` | `true` | Prefer `UltmtDbtr` / `UltmtCdtr` |
 
-## Unicode Normalization (`USE_UTF8PROC`)
+## Optional Unicode Normalization (`USE_UTF8PROC`)
 
-If compiled with `USE_UTF8PROC`, the following normalization is applied:
-- Convert to **NFC**
-- Case folding
-- Remove zero-width artifacts
+This library supports optional full Unicode normalization of free-text fields
+(e.g., remittance lines, counterparty names, references).
+
+If compiled with `-DUSE_UTF8PROC`, the following normalization is applied using
+the MIT-licensed `utf8proc` library:
+
+- Normalize text to **NFC**
+- Unicode-aware case folding
+- Removal of zero-width characters
 - Stable whitespace normalization
 
 If `USE_UTF8PROC` is **not** defined:
-- A minimal ASCII fallback is used.
+
+- A lightweight ASCII-only fallback is used
+- No external dependencies are required
+- No utf8proc code is linked or distributed
+
 
 ## Canonical Transaction Hashing
 
