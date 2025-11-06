@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.04">
+  <BkToCstmrStmt>
+    <Stmt>
+      <Id>STATEMENT-2025-01-15</Id>
+      <ElctrncSeqNb>1</ElctrncSeqNb>
+      <CreDtTm>2025-01-15T08:32:00Z</CreDtTm>
+
+      <Acnt>
+        <Id>
+          <IBAN>DE95000000000006545177</IBAN>
+        </Id>
+      </Acnt>
+
+      <!-- 1) Zahlungseingang -->
+      <Ntry>
+        <Amt Ccy="EUR">850.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <BookgDt><Dt>2025-01-14</Dt></BookgDt>
+        <ValDt><Dt>2025-01-14</Dt></ValDt>
+        <NtryDtls>
+          <TxDtls>
+            <RltdPties>
+              <Dbtr>
+                <Nm>Faktura Services AG</Nm>
+              </Dbtr>
+              <DbtrAcct>
+                <Id><IBAN>DE13000000000011492101</IBAN></Id>
+              </DbtrAcct>
+            </RltdPties>
+            <RmtInf>
+              <Ustrd>Invoice 2025-001 / Customer 10245</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+
+      <!-- 2) Lastschrift / Zahlungsausgang -->
+      <Ntry>
+        <Amt Ccy="EUR">-47.29</Amt>
+        <CdtDbtInd>DBIT</CdtDbtInd>
+        <BookgDt><Dt>2025-01-13</Dt></BookgDt>
+        <ValDt><Dt>2025-01-13</Dt></ValDt>
+        <NtryDtls>
+          <TxDtls>
+            <RltdPties>
+              <Cdtr>
+                <Nm>City Water Utility</Nm>
+              </Cdtr>
+              <CdtrAcct>
+                <Id><IBAN>DE13000000000011492101</IBAN></Id>
+              </CdtrAcct>
+            </RltdPties>
+            <RmtInf>
+              <Ustrd>Utility Bill 2025-01</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+
+      <!-- 3) SEPA Überweisung Zahlungsausgang -->
+      <Ntry>
+        <Amt Ccy="EUR">-2350.00</Amt>
+        <CdtDbtInd>DBIT</CdtDbtInd>
+        <BookgDt><Dt>2025-01-12</Dt></BookgDt>
+        <ValDt><Dt>2025-01-12</Dt></ValDt>
+        <NtryDtls>
+          <TxDtls>
+            <RltdPties>
+              <Cdtr>
+                <Nm>Example Consulting GmbH</Nm>
+              </Cdtr>
+              <CdtrAcct>
+                <Id><IBAN>DE13000000000011492101</IBAN></Id>
+              </CdtrAcct>
+            </RltdPties>
+            <RmtInf>
+              <Ustrd>Consulting Services January 2025</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>

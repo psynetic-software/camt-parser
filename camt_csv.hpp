@@ -10,6 +10,7 @@
  
 #pragma once
 #include "camt_model.hpp"
+#include "camt_parser_pugi.hpp"
 #include "gvc_map.hpp"
 #include <ostream>
 #include <string>
@@ -120,7 +121,7 @@ namespace camt {
     // - strips ASCII whitespace
     // - lowercases A–Z
     // - leaves all non-ASCII bytes untouched
-    inline std::string normalize_freetext(std::string_view in) {
+    inline std::string normalize_freetext(std::string_view in, bool do_casefold = true, bool strip_zero_width = true) {
         std::string out;
         out.reserve(in.size());
         for (unsigned char c : in) {

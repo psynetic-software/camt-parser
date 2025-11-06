@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/">
+    <file>example.camt053.xml</file>
+  </qresource>
+</RCC>
