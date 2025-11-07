@@ -1,2 +1,54 @@
+# Qt Creator
 *.pro.user
 *.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.qmlproject.user
+*.qmlproject.user.*
+
+# Build Ordner häufig:
+build*/
+Build*/
+build-*/
+Build-*/
+cmake-build-*/
+
+# Temp / Cache
+*.tmp
+*.temp
+*~
+*.autosave
+*.swp
+*.bak
+*.orig
+
+# CMake Cache & Ergebnisse
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+Makefile
+*.cmake
+
+# qmake generiert:
+*.moc
+moc_*.cpp
+ui_*.h
+qrc_*.cpp
+*.prl
+*.o
+*.obj
+
+# Visual Studio / MSVC
+*.vcxproj.user
+*.vcxproj.filters
+*.pdb
+*.ilk
+*.suo
+*.idb
+
+# Qt Creator Clangd
+.clangd/
+.clang-tidy
+.clang-format
+.cache/

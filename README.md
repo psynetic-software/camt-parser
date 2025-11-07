@@ -103,6 +103,108 @@ camt::export_entries_csv(doc, &out, nullptr, opt);
 | `use_effective_credit` | `false` | Apply reversal indicator |
 | `prefer_ultimate_counterparty` | `true` | Prefer `UltmtDbtr` / `UltmtCdtr` |
 
+## Exported Row Format: Display Value (`first`) vs Normalized Value (`second`)
+
+Each exported field consists of a pair:
+- **first**: Human-readable display value (formatted, signed, date-formatted)
+- **second**: Canonical normalized value used for sorting, comparison, and deterministic hashing.
+
+`second` is **never empty** — if not assigned directly, it is generated via normalization rules.
+
+### Field overview (C1 display naming)
+
+| Field | `first` (display) | `second` (normalized raw) | Influenced by options |
+|---|---|---|---|
+| Value Date | `YYYY-MM-DD` | `YYYYMMDD` digits | Sorting (`useBookingDate=false`) |
+| Booking Date | `YYYY-MM-DD` | `YYYYMMDD` digits | Sorting (`useBookingDate=true`) |
+| Amount | Formatted signed or unsigned | Absolute numeric text | `signed_amount`, `use_effective_credit` |
+| Is Credit | `1`/`0` or `CRDT`/`DBIT` | `1`/`0` original direction | `credit_as_bool`, `use_effective_credit` |
+| Reversal | `1` or `0` | `1` or `0` | Affects sign if `use_effective_credit=true` |
+| Currency | `EUR` etc. | Uppercased, trimmed | Normalization only |
+| Counterparty Name | Human-friendly chosen party | NFC/casefold/trim normalized | `prefer_ultimate_counterparty`, normalization |
+| Counterparty IBAN | Formatted IBAN | Uppercase, no spaces | Normalization |
+| Counterparty BIC | Formatted BIC | Uppercase, no spaces | Normalization |
+| Remittance Line | Joined text lines | GS-joined normalized tokens | `remittance_separator`, `USE_UTF8PROC` |
+| Remittance Structured | Display text | Normalized base | Normalization |
+| End-to-End ID | Shown as provided | Uppercase, no spaces | Normalization |
+| Mandate ID | Shown as provided | Uppercase, no spaces | Normalization |
+| Transaction ID | Shown as provided | Uppercase, no spaces | Normalization |
+| Bank Reference | Display reference | Normalized | Normalization |
+| Account IBAN | Statement IBAN | Uppercase, no spaces | Normalization |
+| Account BIC | Statement BIC | Uppercase, no spaces | Normalization |
+| Booking Code | Code as text | Uppercase trimmed | Normalization |
+| Status | Display text | Trimmed | Normalization |
+| Running Balance | Formatted running total | Same as display | Always signed logically (`CRDT = +`, `DBIT = −`) |
+| Charges Amount | Display charges | Same as display | Independent of `signed_amount` |
+| Charges Currency | Display currency | Normalized | Normalization |
+| Charges Included | `1`/`0` | Same | None |
+| Entry Ordinal | Display index | Same | Used as stable tiebreaker |
+| Transaction Ordinal | Display index | Same | Used as stable tiebreaker |
+
+This section ensures consistent interpretation when converting to CSV, databases, or accounting systems.
+
+ (`first`) vs Normalized Value (`second`)
+
+Each exported field consists of a pair:
+- **first**: Human-readable display value (formatted, signed, date-formatted)
+- **second**: Canonical normalized value used for sorting, comparison, and deterministic hashing.
+
+`second` is **never empty** — if not assigned directly, it is generated via normalization.
+
+| Display Name | `first` (human output) | `second` (normalized / for sorting) | Relevant Options |
+|---|---|---|---|
+| **Value Date** | `YYYY-MM-DD` | `YYYYMMDD` | Affects sorting order |
+| **Booking Date** | `YYYY-MM-DD` | `YYYYMMDD` | Sorting if selected |
+| **Amount** | Signed or unsigned amount text | Absolute numeric amount | `signed_amount`, `use_effective_credit` |
+| **Is Credit** | `1` (credit) / `0` (debit) or `CRDT/DBIT` | Always `1/0` for original direction | `credit_as_bool`, `use_effective_credit` |
+| **Reversal** | `1` or `0` | Same | May flip meaning under `use_effective_credit` |
+| **Counterparty Name** | Best resolved party name | Case-normalized canonical text | `prefer_ultimate_counterparty` |
+| **Counterparty IBAN** | Standard IBAN text | Uppercased, spaces removed | Normalization |
+| **Counterparty BIC** | Standard BIC text | Uppercased, spaces removed | Normalization |
+| **Remittance** | Joined free text lines | Canonical token-joined, normalized lines | `remittance_separator`, `USE_UTF8PROC` |
+| **Structured Reference** | Display reference text | Normalized canonical text | `USE_UTF8PROC` |
+| **End-to-End ID** | Displayed as present | Uppercased, spaces removed | Normalization |
+| **Mandate ID / Transaction ID / Bank Reference** | Display text | Normalized ID | Normalization |
+| **Running Balance** | Accumulated signed balance | Same as display | Determined by sorting order |
+| **Opening / Closing Balance** | Displayed balance | Same | Placement depends on statement order |
+
+Normalization rules:
+- Text fields are trimmed and unified
+- Codes & currency uppercased
+- IBAN/BIC spaces removed
+- Date `.second` always `YYYYMMDD`
+- `Amount.second` is always absolute value
+- Advanced Unicode normalization if compiled with `USE_UTF8PROC`
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `delimiter` | `';'` | CSV separator (`;`, `,`, or `\t`) |
+| `include_header` | `true` | Adds header row |
+| `write_utf8_bom` | `false` | Necessary for Excel UTF-8 import |
+| `signed_amount` | `true` | Credit positive / Debit negative |
+| `credit_as_bool` | `true` | `IsCredit = 1/0` instead of `CRDT/DBIT` |
+| `remittance_separator` | `""` | Join multiple `Ustrd[]` lines |
+| `use_effective_credit` | `false` | Apply reversal indicator |
+| `prefer_ultimate_counterparty` | `true` | Prefer `UltmtDbtr` / `UltmtCdtr` |
+
+## Exported Row Format: first vs second
+
+Every column in `ExportData` is stored as a pair:
+
+- `first` → human-readable, formatted display value
+- `second` → normalized, canonical value used for sorting, hashing, and stable processing
+
+If a field does not explicitly assign `second`, it is filled from `first` via normalization.
+
+Normalization rules include:
+- Date fields → `YYYYMMDD`
+- IBAN/BIC → uppercase, no spaces
+- Free-text fields → trimmed, casefolded (with utf8proc if enabled)
+- Amounts → `second` stores absolute value
+
+Sorting uses `.second` for date ordering.
+Running balance uses signed logic independent of display formatting.
+
 ## Optional Unicode Normalization (`USE_UTF8PROC`)
 
 This library supports optional full Unicode normalization of free-text fields

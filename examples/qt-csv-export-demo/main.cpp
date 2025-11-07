@@ -34,23 +34,48 @@ int main(int argc, char *argv[])
     camt::export_entries_csv(doc, nullptr, &camtData, opt);
     camt::sortExportData(camtData, opt.include_header, true);
 
+    /*
+    Each exported field consists of a pair:
+    - first: Human-readable display value (formatted, signed, date-formatted)
+    - second: Canonical normalized value used for sorting, comparison, and deterministic hashing.
+    `second` is never empty — if not assigned directly, it is generated via normalization.
+    */
+
+    auto L = [](const char* label, int w = 34){
+        return QString(label).leftJustified(w, QLatin1Char(' '));
+    };
+
     for (const auto& row : camtData)
     {
         auto S = [](const std::string& s){ return QString::fromUtf8(s.c_str()); };
 
-        qDebug()    << "CounterpartyIBAN:"                          <<  S(row[camt::to_index(camt::ExportField::CounterpartyIBAN)].first);
-        qDebug()    << "RemittanceLine:"                            <<  S(row[camt::to_index(camt::ExportField::RemittanceLine)].first);
-        qDebug()    << "IsCredit:"                                  <<  row[camt::to_index(camt::ExportField::CreditDebit)].first;
-        qDebug()    << "Reversal:"                                  <<  row[camt::to_index(camt::ExportField::Reversal)].first;
+        auto v = [&](camt::ExportField f){
+            return row[camt::to_index(f)];
+        };
 
-        qDebug()    << "ValueDate   YYYY-MM-DD:"                    <<  S(row[camt::to_index(camt::ExportField::ValueDate)].first)
-                    << "ValueDate   YYYYMMDD:"                      <<  S(row[camt::to_index(camt::ExportField::ValueDate)].second)     << "\n"
-                    << "BookingDate YYYY-MM-DD:"                    <<  S(row[camt::to_index(camt::ExportField::BookingDate)].first)
-                    << "BookingDate YYYYMMDD:"                      <<  S(row[camt::to_index(camt::ExportField::BookingDate)].second)   << "\n"
-                    << "Amount before CreditDebit and Reversal:"    <<  S(row[camt::to_index(camt::ExportField::Amount)].second)
-                    << "Final Amount:"                              <<  S(row[camt::to_index(camt::ExportField::Amount)].first)
-                    << "\n";
+        qDebug().noquote() << L("CounterpartyIBAN:") << S(v(camt::ExportField::CounterpartyIBAN).first);
+        qDebug().noquote() << L("RemittanceLine:")   << S(v(camt::ExportField::RemittanceLine).first);
+        qDebug().noquote() << L("IsCredit:")         << v(camt::ExportField::CreditDebit).first;
+        qDebug().noquote() << L("Reversal:")         << v(camt::ExportField::Reversal).first;
+
+        qDebug().noquote()
+            << L("ValueDate   YYYY-MM-DD:") << S(v(camt::ExportField::ValueDate).first)
+            << "   "
+            << L("ValueDate YYYYMMDD:")     << S(v(camt::ExportField::ValueDate).second);
+
+        qDebug().noquote()
+            << L("BookingDate YYYY-MM-DD:") << S(v(camt::ExportField::BookingDate).first)
+            << "   "
+            << L("BookingDate YYYYMMDD:")   << S(v(camt::ExportField::BookingDate).second);
+
+        qDebug().noquote()
+            << L("Amount (normalized):")    << S(v(camt::ExportField::Amount).second)
+            << "   "
+            << L("Amount (final):")         << S(v(camt::ExportField::Amount).first);
+
+        qDebug() << "";
     }
+
 
     qInfo("Done.");
     return 0;
