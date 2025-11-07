@@ -89,6 +89,62 @@ opt.credit_as_bool = true;
 
 camt::export_entries_csv(doc, &out, nullptr, opt);
 ```
+## Quick Start Example
+
+This example demonstrates parsing a CAMT file and exporting transactions to CSV:
+
+~~~cpp
+#include <camt_parser_pugi.hpp>
+#include <camt_csv.hpp>
+#include <fstream>
+#include <iostream>
+
+int main() {
+    camt::Parser parser;
+    camt::Document doc;
+    std::string err;
+
+    // Parse CAMT XML from file
+    if (!parser.parse_file("statement.camt053.xml", doc, &err)) {
+        std::cerr << "Parse error: " << err << "\n";
+        return 1;
+    }
+
+    // Export to CSV
+    camt::ExportData data;
+    camt::ExportOptions opt;
+    opt.include_header = true;
+
+    std::ofstream out("export.csv", std::ios::binary);
+    camt::export_entries_csv(doc, &out, &data, opt);
+
+    std::cout << "Export completed: export.csv\n";
+    return 0;
+}
+~~~
+
+### Field Semantics: `first` vs `second`
+
+Each exported field consists of a pair:
+
+- **first** → Human-readable formatted value  
+- **second** → Canonical normalized value used for sorting, hashing, and deduplication
+
+`second` is **never empty**: if not present, it is generated via normalization rules.
+
+### Supported Input Methods
+
+| Input type | Function |
+|-----------|----------|
+| File path | `parse_file(const std::string& path, ...)` |
+| Input stream | `parse_file(std::istream&, ...)` |
+| Memory buffer | `parse_string(const char* buffer, ...)` |
+
+### Complete Demonstration
+
+A fully working test and demonstration is available here: examples/main.cpp
+
+
 
 ## ExportOptions
 

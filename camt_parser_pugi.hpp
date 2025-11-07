@@ -14,7 +14,9 @@
 #include <unordered_map>
 #include <algorithm>
 #include <string>
-#include <cstring>  
+#include <cstring>
+#include <fstream>
+#include <filesystem>
 
 namespace camt {
 
@@ -850,7 +852,6 @@ inline Statement parse_statement(const pugi::xml_node& stmt, const GroupHeader* 
     return s;
 }
 
-
 inline pugi::xml_node find_payload(const pugi::xml_node& root){
     if (isln(root,"BkToCstmrStmt")||isln(root,"BkToCstmrDbtCdtNtfctn")||isln(root,"BkToCstmrAcctRpt"))
         return root;
@@ -878,39 +879,110 @@ inline DocKind detect_kind(const pugi::xml_node& payload){
 class Parser {
 public:
     
-    bool parse_file(const std::string& path, Document& out, std::string* error=nullptr) const {
-        pugi::xml_document doc;
-        pugi::xml_parse_result ok = doc.load_file(path.c_str(), pugi::parse_default | pugi::parse_declaration);
-        if (!ok){ if(error)*error="XML file parse error"; return false; }
-        return parse_doc(doc, out, error);
+    bool parse_file(const std::string& utf8Path, Document& out, std::string* error = nullptr) const
+    {
+        // Build a filesystem::path from UTF-8 (works on Windows and POSIX)
+        const std::filesystem::path p = std::filesystem::u8path(utf8Path);
+
+        // Optional: fast sanity checks that don't throw (use error_code overloads)
+        std::error_code ecStat;
+        const auto s = std::filesystem::status(p, ecStat);
+        if (ecStat) {
+            if (error) {
+                *error = std::string("Cannot query file status for '")
+                         + utf8Path + "': " + ecStat.message();
+            }
+            return false;
+        }
+        if (!std::filesystem::exists(s)) {
+            if (error) {
+                *error = std::string("File not found: '") + utf8Path + "'";
+            }
+            return false;
+        }
+        if (std::filesystem::is_directory(s)) {
+            if (error) {
+                *error = std::string("Path is a directory, not a file: '") + utf8Path + "'";
+            }
+            return false;
+        }
+
+        // Try to open; capture errno immediately on failure
+        errno = 0;
+        std::ifstream in(p, std::ios::binary);
+        if (!in.is_open()) {
+            const int e = errno; // must read immediately
+            const std::string sysMsg = std::system_category().message(e);
+            if (error) {
+                *error = std::string("Open failed for '") + utf8Path + "': "
+                       + (e ? sysMsg : std::string("unknown error"));
+            }
+            return false;
+        }
+
+        // Delegate to the stream-based parser
+        return parse_file(in, out, error);
     }
 
     bool parse_file(std::istream& is, Document& out, std::string* error=nullptr) const {
         pugi::xml_document doc;
-        pugi::xml_parse_result ok = doc.load(is, pugi::parse_default | pugi::parse_declaration);
-        if (!ok){ if(error)*error="XML file parse error"; return false; }
+        pugi::xml_parse_result res = doc.load(is, pugi::parse_default | pugi::parse_declaration);
+        if (!res)
+        {
+            if(error)
+            {
+                *error=xmlErr;
+                (*error) += res.description();
+            }
+            return false;
+        }
         return parse_doc(doc, out, error);
     }
 
     bool parse_string(const std::string& xml_utf8, Document& out, std::string* error=nullptr) const {
         pugi::xml_document doc;
-        pugi::xml_parse_result ok = doc.load_buffer(xml_utf8.data(), xml_utf8.size(), pugi::parse_default | pugi::parse_declaration);
-        if (!ok){ if(error)*error="XML parse error"; return false; }
+        pugi::xml_parse_result res = doc.load_buffer(xml_utf8.data(), xml_utf8.size(), pugi::parse_default | pugi::parse_declaration);
+        if (!res)
+        {
+            if(error)
+            {
+                *error=xmlErr;
+                (*error) += res.description();
+            }
+            return false;
+        }
         return parse_doc(doc, out, error);
     }
 
 private:
     bool parse_doc(const pugi::xml_document& doc, Document& out, std::string* error) const {
         pugi::xml_node root = doc.document_element();
-        if (!root){ if(error)*error="Empty document"; return false; }
+        if (!root)
+        {
+            if(error)
+            {
+                *error="Empty document";
+            }
+            return false;
+        }
         pugi::xml_node payload = find_payload(root);
         out.kind = detect_kind(payload);
-        if (out.kind==DocKind::Unknown){ if(error)*error="Unsupported CAMT root"; return false; }
+        if (out.kind==DocKind::Unknown)
+        {
+            if(error)
+            {
+                *error="Unsupported CAMT root";
+            }
+            return false;
+        }
 
         // optional GrpHdr above the statements
         std::optional<GroupHeader> gh;
         pugi::xml_node g = child_any(payload,"GrpHdr");
-        if (g) gh = parse_group_header(g);
+        if (g)
+        {
+            gh = parse_group_header(g);
+        }
 
         for (pugi::xml_node n = payload.first_child(); n; n = n.next_sibling()){
             if (isln(n,"Stmt") || isln(n,"Ntfctn") || isln(n,"Rpt"))
@@ -918,6 +990,8 @@ private:
         }
         return true;
     }
+
+    const char* xmlErr="XML file parse error: ";
 };
 
 } // namespace camt

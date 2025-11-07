@@ -386,6 +386,7 @@ inline void normalize_or_accumulate_row(
     }
 }
 
+#if 0
 inline bool sortExportData(ExportData& rows, bool hasTitle, bool useBookingDate)
 {
     auto to_int_noexcept = [](const std::string& s, int64_t default_val = 0) {
@@ -434,8 +435,104 @@ inline bool sortExportData(ExportData& rows, bool hasTitle, bool useBookingDate)
             return false;
     });
 
+    double running = 0.0;
+    for (auto &row : rows) {
+        double amt = std::strtod(row[camt::to_index(camt::ExportField::Amount)].second.c_str(), nullptr);
+        running += amt;
+        row[camt::to_index(camt::ExportField::RunningBalance)].second = std::to_string(running);
+    }
+
     return true;
 }
+#endif
+
+inline bool sortExportData(ExportData& rows, bool hasTitle, bool useBookingDate)
+{
+    auto to_i64 = [](const std::string& s, int64_t d=0){
+        int64_t v=d; auto [p,ec]=std::from_chars(s.data(), s.data()+s.size(), v);
+        return ec==std::errc() ? v : d;
+    };
+
+    const size_t n   = static_cast<size_t>(ExportField::Count);
+    const size_t off = hasTitle ? 1 : 0;
+    if (rows.size() < 1 + off) { return true; }
+    if (rows[off].size() < n)  { return false; }
+
+    // 1) Sortierung: Datum (YYYYMMDD second), IBAN, EntryOrdinal, TransactionOrdinal
+    std::stable_sort(rows.begin()+static_cast<std::ptrdiff_t>(off), rows.end(),
+        [&](const auto& a, const auto& b){
+            auto keyDate = useBookingDate ? ExportField::BookingDate : ExportField::ValueDate;
+            auto da = to_i64(a[to_index(keyDate)].second);
+            auto db = to_i64(b[to_index(keyDate)].second);
+            if (da != db) return da < db;
+
+            const auto& ia = a[to_index(ExportField::AccountIBAN)].second;
+            const auto& ib = b[to_index(ExportField::AccountIBAN)].second;
+            if (ia != ib) return ia < ib;
+
+            auto eoA = to_i64(a[to_index(ExportField::EntryOrdinal)].second);
+            auto eoB = to_i64(b[to_index(ExportField::EntryOrdinal)].second);
+            if (eoA != eoB) return eoA < eoB;
+
+            auto toA = to_i64(a[to_index(ExportField::TransactionOrdinal)].second);
+            auto toB = to_i64(b[to_index(ExportField::TransactionOrdinal)].second);
+            return toA < toB;
+        }
+    );
+
+    // 2) Running Balance pro IBAN, mit Sign aus CreditDebit.second XOR Reversal.second
+    // Amount.second ist absoluter Betrag (Text, Punkt als Dezimaltrennzeichen).
+    auto frac = [](const std::string& s){ auto p=s.find('.'); return p==std::string::npos?0:int(s.size()-p-1); };
+    auto parse_scaled = [&](const std::string& s, int scale){
+        std::string ip=s, fp; auto p=s.find('.'); if(p!=std::string::npos){ ip=s.substr(0,p); fp=s.substr(p+1); }
+        if ((int)fp.size() < scale) fp.append(size_t(scale - (int)fp.size()), '0'); else if ((int)fp.size() > scale) fp.resize(size_t(scale));
+        if (ip.empty()) ip = "0";
+        std::string all = ip + (scale?fp:"");
+        int64_t v=0; if(!all.empty()){ auto [_,ec]=std::from_chars(all.data(), all.data()+all.size(), v); if(ec!=std::errc()) v=0; }
+        return v;
+    };
+    auto fmt_scaled = [](int64_t v, int scale){
+        bool neg = v<0; uint64_t u = neg? (uint64_t)(-v) : (uint64_t)v;
+        std::string s = std::to_string(u);
+        if (scale==0) { if(neg) s.insert(s.begin(), '-'); return s; }
+        if (s.size() <= (size_t)scale) s.insert(s.begin(), size_t(scale+1 - s.size()), '0');
+        size_t dot = s.size() - (size_t)scale; s.insert(s.begin()+std::ptrdiff_t(dot), '.');
+        while (!s.empty() && s.back()=='0') s.pop_back();
+        if (!s.empty() && s.back()=='.') s.pop_back();
+        if (s.empty()) s="0";
+        if (neg) s.insert(s.begin(), '-');
+        return s;
+    };
+
+    struct Bal { int64_t v=0; int scale=0; };
+    std::unordered_map<std::string, Bal> bal;
+
+    for (size_t i=off; i<rows.size(); ++i)
+    {
+        auto& row = rows[i];
+        const auto& iban = row[to_index(ExportField::AccountIBAN)].second;
+        const auto& asec = row[to_index(ExportField::Amount)].second;       // absolut
+        const bool credit = row[to_index(ExportField::CreditDebit)].second == "1";
+        const bool reversal = row[to_index(ExportField::Reversal)].second == "1";
+
+        int sign = credit ? +1 : -1;
+        if (reversal) { sign = -sign; }
+
+        Bal& b = bal[iban];
+        int sScale = frac(asec);
+        if (sScale > b.scale) { for(int k=0;k<sScale-b.scale;++k) { b.v *= 10; } b.scale = sScale; }
+
+        int64_t delta = parse_scaled(asec, b.scale);
+        b.v += sign * delta;
+
+        row[to_index(ExportField::RunningBalance)].first=row[to_index(ExportField::RunningBalance)].second = fmt_scaled(b.v, b.scale);
+        // optional: mirror .first:
+        // row[to_index(ExportField::RunningBalance)].first = row[to_index(ExportField::RunningBalance)].second;
+    }
+
+    return true;
+}
+
 
 inline std::string accumulate_hash_row(const CAMTRow& row, const std::initializer_list<ExportField> fields = {})
 {
