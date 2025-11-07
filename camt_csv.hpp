@@ -437,7 +437,7 @@ inline bool sortExportData(ExportData& rows, bool hasTitle, bool useBookingDate)
     return true;
 }
 
-inline std::string accumulate_hash_row(CAMTRow& row, const std::initializer_list<ExportField> fields = {})
+inline std::string accumulate_hash_row(const CAMTRow& row, const std::initializer_list<ExportField> fields = {})
 {
     const std::initializer_list<ExportField> kHashCoreFields
     {
@@ -460,7 +460,8 @@ inline std::string accumulate_hash_row(CAMTRow& row, const std::initializer_list
     
     std::string sum;
     sum.reserve(512);
-    normalize_or_accumulate_row(row, fields.size()==0 ? kHashCoreFields : fields, true, &sum);
+    CAMTRow _row=row;
+    normalize_or_accumulate_row(_row, fields.size()==0 ? kHashCoreFields : fields, true, &sum);
     return sum;
 }
 

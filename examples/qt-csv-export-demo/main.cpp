@@ -1,6 +1,7 @@
 #include <QCoreApplication>
 #include <QFile>
 #include <QTextStream>
+#include <QCryptographicHash>
 #include <camt_parser_pugi.hpp>
 #include <camt_csv.hpp>
 
@@ -53,6 +54,9 @@ int main(int argc, char *argv[])
             return row[camt::to_index(f)];
         };
 
+        std::string hash = camt::accumulate_hash_row(row);
+
+        qDebug().noquote() << L("HashSHA256")        << QCryptographicHash::hash(hash.c_str(), QCryptographicHash::Sha256).toHex();
         qDebug().noquote() << L("CounterpartyIBAN:") << S(v(camt::ExportField::CounterpartyIBAN).first);
         qDebug().noquote() << L("RemittanceLine:")   << S(v(camt::ExportField::RemittanceLine).first);
         qDebug().noquote() << L("IsCredit:")         << v(camt::ExportField::CreditDebit).first;
